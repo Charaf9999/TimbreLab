@@ -17,3 +17,5 @@ Clone this repository. Create a branch for one task, commit a small working chan
 ## Audio feature extraction
 
 See docs/audio-first-step.md for installation, the WAV-to-CSV command and an explanation of each step. data/examples/NocturneN20_features.csv is a real feature row from a piano clip. Its classical genre was supplied by Charaf's task context; it is not a model prediction. The source WAV stays local.
+
+Batch extraction and dataset audit instructions are in docs/audio-dataset.md.
