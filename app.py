@@ -9,6 +9,8 @@ import streamlit as st
 import analysis
 import models
 from timbrelab.charts import exploration_chart, figure_png, plt
+from timbrelab.audio_upload import show_wav_upload
+from timbrelab.dataset_audit import show_dataset_audit, matching_audit
 from timbrelab.contracts import AUDIO_FEATURES, MODELS, validate_result
 from timbrelab.data import (
     clear_stale_result, feature_exclusions, identifier_columns,
@@ -38,7 +40,7 @@ def preview_sample():
 
 
 def show_header():
-    """Display the illustrated studio header and ambient-motion preference."""
+    """Display the illustrated studio header with automatic ambient motion."""
     render_studio_header()
 
 
@@ -102,6 +104,12 @@ def main():
     import_tab, explore, configure, results, exports = st.tabs(STAGES, key="studio_stage", on_change="rerun")
     with import_tab:
         dataset = import_dataset()
+        with st.expander("Prepare features from WAV recordings"):
+            st.markdown("Single WAV: open **Results → Listen, measure, predict**. "
+                        "For labelled preparation, see [Charaf's extraction instructions]"
+                        "(https://github.com/Charaf9999/TimbreLab/blob/fb5350dc15c15eb48c38c8bf197a60e328802c77/docs/audio-dataset.md).")
+            st.caption("Prepare labelled folders with python -m audio.batch. "
+                       "See the linked instructions for dataset preparation and duplicate grouping.")
     if dataset is None:
         st.session_state.pop("result", None)
         with explore:
@@ -122,6 +130,12 @@ def main():
         for col, label, value in zip(st.columns(4), ["Rows", "Columns", "Missing cells", "Duplicate rows"],
                                      [len(table), len(table.columns), missing, int(table.duplicated().sum())]):
             col.metric(label, f"{value:,}")
+        if "genre" in table:
+            st.metric("Genres", table["genre"].nunique())
+            with st.expander("Clips per genre"):
+                st.dataframe(table["genre"].value_counts().rename_axis("Genre").reset_index(name="Clips"),
+                             hide_index=True, width="stretch")
+        show_dataset_audit(content)
         st.dataframe(table.head(200), hide_index=True, width="stretch")
         st.caption(f"Showing the first {min(200, len(table)):,} of {len(table):,} rows. Downloads include the full table.")
         st.download_button("Download current table · CSV", csv_bytes(table),
@@ -137,7 +151,8 @@ def main():
             if missing:
                 st.caption("Missing values are included in the counts above.")
         with right:
-            chart_default = list(table.columns).index(suggested_target) if suggested_target in table.columns else 0
+            chart_target = suggested_target or ("genre" if "genre" in table else None)
+            chart_default = list(table.columns).index(chart_target) if chart_target in table.columns else 0
             column = st.selectbox("Explore a column", list(table.columns), index=chart_default, key=f"chart_{dataset_key}")
             fig = exploration_chart(table, column)
             try:
@@ -196,11 +211,15 @@ def main():
         if task == "regression" and "genre" in table:
             exclusions["genre"] = "Genre label: excluded from audio regression"
         available = [c for c in table if c not in exclusions]
+        if set(AUDIO_FEATURES).issubset(table.columns):
+            available = [c for c in AUDIO_FEATURES if c in available] + [c for c in available if c not in AUDIO_FEATURES]
         model_label = st.selectbox("Model", list(MODELS[task]), key=f"model_{dataset_key}_{task}")
         model_name = MODELS[task][model_label]
         # Target changes also reset feature defaults so an old target is never carried over.
         feature_key = f"features_{dataset_key}_{task}_{target}_{model_name}_{','.join(available)}"
         defaults = available[:1] if model_name in {"simple_linear", "polynomial"} else available
+        if task == "classification" and target == "genre" and set(AUDIO_FEATURES).issubset(available):
+            defaults = list(AUDIO_FEATURES)
         features = st.multiselect("Numeric predictors", available, default=defaults, key=feature_key)
         k, group_column = 3, None
         if task == "clustering":
@@ -217,6 +236,8 @@ def main():
         audio_schema = task == "classification" and target == "genre" and features == list(AUDIO_FEATURES)
         if audio_schema and "recording_id" in table and group_column != "recording_id":
             errors.append("Select recording_id to keep excerpts of each recording together.")
+        if matching_audit(content) and task != "clustering" and group_column != "recording_id":
+            errors.append("This GTZAN dataset requires recording_id grouping, including regression.")
         settings = {"task": task, "target": target, "features": features, "model_name": model_name,
                     "identifiers": identifiers, "group_column": group_column, "k": k if task == "clustering" else None,
                     "separator": separator, "encoding": encoding}
@@ -231,6 +252,8 @@ def main():
         configuration = {**settings, "dataset_sha256": sha256(content).hexdigest(),
                          "source": source, "dataset_name": filename, "synthetic_example": source in EXAMPLES,
                          "row_count": len(table)}
+        if matching_audit(content):
+            configuration["dataset_feature_version"] = "audio_v1"
         if st.button("Run analysis", type="primary", disabled=bool(errors), icon=":material/graphic_eq:"):
             st.session_state.pop("result", None)
             try:
@@ -263,6 +286,7 @@ def show_session(results, exports, configuration):
         chart = show_results(result)
         if preview:
             st.button("Close sample preview", on_click=lambda: st.session_state.update(preview_sample=False))
+        show_wav_upload(result)
     with exports:
         show_exports(result, chart, configuration)
     show_footer()

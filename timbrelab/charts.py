@@ -43,7 +43,7 @@ def exploration_chart(table, column):
         ax.set_xlabel("Rows")
     if values.dtype.kind in "iuf":
         ax.set_xlabel(column)
-    ax.set_title(f"{column} · distribution", loc="left", pad=12)
+    ax.set_title(f"{column} · distribution", loc="left", pad=12, color="#f4efe5")
     return fig
 
 

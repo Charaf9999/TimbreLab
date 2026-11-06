@@ -5,6 +5,8 @@
 *.toml text eol=lf
 *.txt text eol=lf
 *.csv text eol=lf
+# Preserve Charaf's original CSV bytes so its audit checksum survives checkout.
+data/examples/gtzan_features.csv -text -eol whitespace=cr-at-eol
 *.png binary
 *.webp binary
 *.wav binary

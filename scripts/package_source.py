@@ -19,7 +19,7 @@ SOURCE_DIRECTORIES = {
     "tests": {".py"},
     "scripts": {".py"},
     "assets": {".css", ".png", ".webp", ".svg"},
-    "data/examples": {".csv", ".md"},
+    "data/examples": {".csv", ".md", ".json"},
 }
 EXCLUDED_DIRECTORIES = {
     ".git", ".venv", "__pycache__", "docs", "private", "notes", "personal",
@@ -44,7 +44,7 @@ def build_source_zip(destination=DESTINATION):
         "target_repository": "https://github.com/Charaf9999/TimbreLab",
         "suggested_branch": "ui/music-studio",
         "publication": "Local source package; this script does not create branches or push to GitHub.",
-        "status": "Interface foundation; training, clustering and audio extraction are pending.",
+        "status": "Dataset and audio integration candidate; supervised training, clustering and second-laptop acceptance are pending.",
         "files": [{"path": name, "bytes": len(content), "sha256": sha256(content).hexdigest()}
                   for name, content in sorted(payloads.items())],
     }

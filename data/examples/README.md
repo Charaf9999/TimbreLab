@@ -1,6 +1,16 @@
-# Synthetic music example
+# Music feature examples
 
-The CSV is an original, invented fixture for development and demonstrations of
+- `gtzan_features.csv`: Charaf's real handoff, 999 clips, 19 columns, 10 genres;
+  jazz has 99 rows and all other genres have 100. Import it through the CSV uploader.
+- `gtzan_audit.json`: matching preparation audit, with a CSV SHA-256 and local machine
+  paths removed. One unreadable jazz WAV was skipped. Fourteen exact duplicate pairs
+  share recording IDs; near duplicates and repeated artists still need review.
+- `NocturneN20_features.csv`: Charaf's reference row from audio branch commit
+  `26e7a8520586884963bdb76c44f163f64887b671`. The matching WAV is not included.
+
+## Synthetic walkthrough
+
+`audio_fixture.csv` is an original, invented fixture for development and demonstrations of
 the music interface. It contains no real recordings and must not be used to claim
 real-world predictive performance.
 

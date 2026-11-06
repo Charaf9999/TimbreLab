@@ -4,11 +4,7 @@ from collections.abc import Mapping
 
 import pandas as pd
 
-AUDIO_FEATURE_VERSION = "audio_v1"
-AUDIO_FEATURES = (
-    "tempo_bpm", "rms_mean", "centroid_hz_mean",
-    *(f"mfcc_{i:02d}_mean" for i in range(1, 14)),
-)
+from audio.schema import FEATURE_COLUMNS as AUDIO_FEATURES, FEATURE_VERSION as AUDIO_FEATURE_VERSION
 
 MODELS = {
     "classification": {

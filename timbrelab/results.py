@@ -81,6 +81,8 @@ def show_results(result):
             plt.close(figure)
         st.image(chart, width="stretch")
     st.caption(explanation)
+    with st.expander("Model and run details"):
+        st.json(json_text(metadata))
     st.markdown("**Cluster assignments**" if task == "clustering" else "**Row-by-row predictions**")
     st.caption(f"{len(predictions):,} rows · The CSV contains the full result.")
     st.dataframe(predictions.head(200), hide_index=True, width="stretch", column_config={
