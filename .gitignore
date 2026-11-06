@@ -5,8 +5,12 @@ __pycache__/
 .pytest_cache/
 .env
 data/raw/
-data/processed/
+data/processed/*
+!data/processed/gtzan_features.csv
+!data/processed/gtzan_audit.json
+!data/processed/gtzan_split.csv
 uploads/
 *.joblib
 
 /NocturneN20.wav
+

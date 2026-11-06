@@ -1,0 +1,100 @@
+{
+  "feature_version": "audio_v1",
+  "files_found": 1000,
+  "usable_rows": 999,
+  "class_counts": {
+    "blues": 100,
+    "classical": 100,
+    "country": 100,
+    "disco": 100,
+    "hiphop": 100,
+    "jazz": 99,
+    "metal": 100,
+    "pop": 100,
+    "reggae": 100,
+    "rock": 100
+  },
+  "missing_features": {
+    "tempo_bpm": 0,
+    "rms_mean": 0,
+    "centroid_hz_mean": 0,
+    "mfcc_01_mean": 0,
+    "mfcc_02_mean": 0,
+    "mfcc_03_mean": 0,
+    "mfcc_04_mean": 0,
+    "mfcc_05_mean": 0,
+    "mfcc_06_mean": 0,
+    "mfcc_07_mean": 0,
+    "mfcc_08_mean": 0,
+    "mfcc_09_mean": 0,
+    "mfcc_10_mean": 0,
+    "mfcc_11_mean": 0,
+    "mfcc_12_mean": 0,
+    "mfcc_13_mean": 0
+  },
+  "exact_duplicate_pairs": [
+    {
+      "clip_id": "disco/disco.00099.wav",
+      "same_audio_as": "disco/disco.00098.wav"
+    },
+    {
+      "clip_id": "hiphop/hiphop.00045.wav",
+      "same_audio_as": "hiphop/hiphop.00039.wav"
+    },
+    {
+      "clip_id": "hiphop/hiphop.00078.wav",
+      "same_audio_as": "hiphop/hiphop.00076.wav"
+    },
+    {
+      "clip_id": "metal/metal.00061.wav",
+      "same_audio_as": "metal/metal.00040.wav"
+    },
+    {
+      "clip_id": "metal/metal.00062.wav",
+      "same_audio_as": "metal/metal.00041.wav"
+    },
+    {
+      "clip_id": "metal/metal.00063.wav",
+      "same_audio_as": "metal/metal.00042.wav"
+    },
+    {
+      "clip_id": "metal/metal.00064.wav",
+      "same_audio_as": "metal/metal.00043.wav"
+    },
+    {
+      "clip_id": "metal/metal.00065.wav",
+      "same_audio_as": "metal/metal.00044.wav"
+    },
+    {
+      "clip_id": "metal/metal.00066.wav",
+      "same_audio_as": "metal/metal.00045.wav"
+    },
+    {
+      "clip_id": "metal/metal.00094.wav",
+      "same_audio_as": "metal/metal.00034.wav"
+    },
+    {
+      "clip_id": "pop/pop.00060.wav",
+      "same_audio_as": "pop/pop.00054.wav"
+    },
+    {
+      "clip_id": "pop/pop.00071.wav",
+      "same_audio_as": "pop/pop.00067.wav"
+    },
+    {
+      "clip_id": "reggae/reggae.00082.wav",
+      "same_audio_as": "reggae/reggae.00081.wav"
+    },
+    {
+      "clip_id": "rock/rock.00016.wav",
+      "same_audio_as": "metal/metal.00058.wav"
+    }
+  ],
+  "failed_files": [
+    {
+      "clip_id": "jazz/jazz.00054.wav",
+      "error": "Cannot read WAV file jazz.00054.wav: Error opening 'C:\\\\Users\\\\espacegamers\\\\Desktop\\\\study\\\\IDIA\\\\M112 - Programmation avanc\u00e9e pour la Data Science\\\\TimbreLab\\\\data\\\\raw\\\\genres\\\\jazz\\\\jazz.00054.wav': Error : bad data offset."
+    }
+  ],
+  "grouping_limit": "IDs group exact decoded-audio duplicates only. Near duplicates and repeated artists still require review before final evaluation."
+}
