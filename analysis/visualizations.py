@@ -1,3 +1,4 @@
+from sklearn.metrics import ConfusionMatrixDisplay
 import numpy as np
 from sklearn.decomposition import PCA
 import pandas as pd
@@ -193,6 +194,88 @@ def plot_cluster_genres(table, result):
         bbox_to_anchor=(1.02, 1),
         loc="upper left"
     )
+
+    fig.tight_layout()
+    return fig
+
+def plot_confusion_matrix(predictions):
+    """Créer une matrice de confusion pour la classification."""
+
+    required = {"actual", "predicted"}
+
+    if not required.issubset(predictions.columns):
+        raise ValueError("Colonnes actual et predicted requises.")
+
+    if predictions.empty:
+        raise ValueError("Le tableau des prédictions est vide.")
+
+    if predictions[["actual", "predicted"]].isna().any().any():
+        raise ValueError("Les étiquettes ne doivent pas être manquantes.")
+
+    y_true = predictions["actual"].astype(str)
+    y_pred = predictions["predicted"].astype(str)
+
+    labels = sorted(set(y_true) | set(y_pred))
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    ConfusionMatrixDisplay.from_predictions(
+        y_true,
+        y_pred,
+        labels=labels,
+        cmap="Blues",
+        xticks_rotation=45,
+        ax=ax,
+        colorbar=False
+    )
+
+    ax.set_title("Matrice de confusion - Classification")
+    ax.set_xlabel("Genre prédit")
+    ax.set_ylabel("Genre réel")
+
+    fig.tight_layout()
+    return fig
+
+
+def plot_regression_predictions(predictions):
+    """Comparer les valeurs réelles et prédites en régression."""
+
+    required = {"actual", "predicted"}
+
+    if not required.issubset(predictions.columns):
+        raise ValueError("Colonnes actual et predicted requises.")
+
+    if predictions.empty:
+        raise ValueError("Le tableau des prédictions est vide.")
+
+    actual = pd.to_numeric(predictions["actual"], errors="coerce")
+    predicted = pd.to_numeric(predictions["predicted"], errors="coerce")
+
+    if not np.isfinite(actual.to_numpy()).all():
+        raise ValueError("Les valeurs réelles doivent être numériques.")
+
+    if not np.isfinite(predicted.to_numpy()).all():
+        raise ValueError("Les prédictions doivent être numériques.")
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    ax.scatter(actual, predicted, alpha=0.7)
+
+    minimum = min(actual.min(), predicted.min())
+    maximum = max(actual.max(), predicted.max())
+
+    ax.plot(
+        [minimum, maximum],
+        [minimum, maximum],
+        "r--",
+        label="Prédiction parfaite"
+    )
+
+    ax.set_title("Régression : valeurs réelles vs prédites")
+    ax.set_xlabel("Valeurs réelles")
+    ax.set_ylabel("Valeurs prédites")
+    ax.legend()
+    ax.grid(alpha=0.3)
 
     fig.tight_layout()
     return fig
