@@ -47,7 +47,7 @@ CLASSIFIERS: dict[str, Callable[[], BaseEstimator]] = {
         n_estimators=100, random_state=RANDOM_STATE, n_jobs=-1
     ),
 }
-REGRESSORS = {"linear_simple", "linear_multiple", "polynomial"}
+REGRESSORS = {"linear_simple", "linear_multiple", "multiple_linear", "polynomial", "simple_linear"}
 
 
 def register_classifier(name: str, factory: Callable[[], BaseEstimator]) -> None:
@@ -83,9 +83,9 @@ def _validated_data(table, task, target, features, group_column, model_name, deg
         raise ValueError(f"Modèle de classification inconnu : {model_name}.")
     if task == "regression" and model_name not in REGRESSORS:
         raise ValueError(f"Modèle de régression inconnu : {model_name}.")
-    if model_name == "linear_simple" and len(features) != 1:
+    if model_name in ("linear_simple", "simple_linear") and len(features) != 1:
         raise ValueError("La régression linéaire simple nécessite exactement 1 caractéristique.")
-    if model_name == "linear_multiple" and len(features) < 2:
+    if model_name in ("linear_multiple", "multiple_linear") and len(features) < 2:
         raise ValueError("La régression multiple nécessite au moins 2 caractéristiques.")
     if model_name == "polynomial":
         if len(features) != 1:
@@ -219,6 +219,12 @@ def train_supervised(
         "task": task,
         "target": target,
         "model_name": model_name,
+        "settings": {
+            "random_state": RANDOM_STATE,
+            "test_size": TEST_SIZE,
+            "group_column": group_column,
+            "polynomial_degree": degree if model_name == "polynomial" else None,
+        },
         "features": list(features),
         "group_column": group_column,
         "random_state": RANDOM_STATE,
