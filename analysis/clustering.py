@@ -82,6 +82,7 @@ def run_clustering(table, features, k):
             "task": "clustering",
             "model_name": "kmeans",
             "features": list(features),
+            "settings": {"k": k, "random_state": 42},
             "k": k,
             "random_state": 42,
         },

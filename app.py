@@ -252,7 +252,8 @@ def main():
         configuration = {**settings, "dataset_sha256": sha256(content).hexdigest(),
                          "source": source, "dataset_name": filename, "synthetic_example": source in EXAMPLES,
                          "row_count": len(table)}
-        if matching_audit(content):
+        is_gtzan = matching_audit(content) is not None
+        if is_gtzan:
             configuration["dataset_feature_version"] = "audio_v1"
         if st.button("Run analysis", type="primary", disabled=bool(errors), icon=":material/graphic_eq:"):
             st.session_state.pop("result", None)
@@ -261,7 +262,10 @@ def main():
                     if task == "clustering":
                         result = analysis.run_clustering(table.copy(), features, k)
                     else:
-                        result = models.train_supervised(table.copy(), task, target, features, model_name, group_column)
+                        split_options = {"use_gtzan_split": True} if is_gtzan and task == "classification" and target == "genre" else {}
+                        result = models.train_supervised(
+                            table.copy(), task, target, features, model_name, group_column, **split_options
+                        )
                     validate_result(result, task, features, model_name)
                     result["metadata"] = {**result["metadata"], "input": configuration}
                     st.session_state["result"] = result

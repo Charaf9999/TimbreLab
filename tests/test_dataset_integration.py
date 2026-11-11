@@ -16,7 +16,7 @@ from timbrelab.contracts import AUDIO_FEATURES, AUDIO_FEATURE_VERSION
 from timbrelab.dataset_audit import matching_audit
 from timbrelab.data import read_csv_bytes
 from timbrelab.results import make_export_bundle
-from test_foundation import TestPipeline, fixture_result
+from tests.test_foundation import TestPipeline, fixture_result
 
 ROOT = Path(__file__).resolve().parents[1]
 CSV = ROOT / "data/examples/gtzan_features.csv"
@@ -49,22 +49,25 @@ class RealDatasetTests(unittest.TestCase):
             self.assertEqual(by_id.loc[pair["clip_id"], "recording_id"], by_id.loc[pair["same_audio_as"], "recording_id"])
         self.assertIsNone(matching_audit(b"unrelated CSV"))
 
-    def test_real_configuration_handoff_and_pending_workflows(self):
+    def test_real_analysis_workflows(self):
         app = self.make_app()
         self.assertEqual(self.select(app, "Target column").value, "genre")
         self.assertEqual(next(e for e in app.multiselect if e.label == "Numeric predictors").value, list(AUDIO_FEATURES))
         self.assertEqual(self.select(app, "Keep rows from the same recording/group together").value, "recording_id")
-        with patch("models.train_supervised", side_effect=NotImplementedError("Basma pending")) as trainer:
-            next(b for b in app.button if b.label == "Run analysis").click().run()
-            self.assertEqual(trainer.call_args.args[1:], ("classification", "genre", list(AUDIO_FEATURES), "logistic_regression", "recording_id"))
-        self.assertNotIn("result", app.session_state)
+        self.select(app, "Model").set_value("Random Forest").run()
+        next(b for b in app.button if b.label == "Run analysis").click().run()
+        result = app.session_state["result"]
+        self.assertEqual(result["pipeline"].named_steps["model"].n_estimators, 300)
+        metadata = result["metadata"]
+        self.assertEqual((metadata["training_rows"], metadata["test_rows"], metadata["excluded_conflicting_rows"]),
+                         (797, 200, 2))
         next(e for e in app.radio if e.label == "Task").set_value("Regression").run()
         self.assertEqual(self.select(app, "Target column").value, "tempo_bpm")
         next(b for b in app.button if b.label == "Run analysis").click().run()
-        self.assertTrue(any("Basma" in msg.value for msg in app.info))
+        self.assertEqual(app.session_state["result"]["metadata"]["task"], "regression")
         next(e for e in app.radio if e.label == "Task").set_value("Clustering").run()
         next(b for b in app.button if b.label == "Run analysis").click().run()
-        self.assertTrue(any("Layla" in msg.value for msg in app.info))
+        self.assertEqual(len(app.session_state["result"]["predictions"]), 999)
         self.assertEqual(list(app.exception), [])
 
     def test_csv_column_order_does_not_change_audio_defaults(self):
@@ -75,7 +78,7 @@ class RealDatasetTests(unittest.TestCase):
 
     def test_upload_replacement_clears_old_training_result(self):
         app = self.make_app()
-        with patch("models.train_supervised", side_effect=fixture_result):
+        with patch("models.train_supervised", side_effect=lambda *args, **kwargs: fixture_result(*args)):
             next(b for b in app.button if b.label == "Run analysis").click().run()
         self.assertIn("result", app.session_state)
         app.file_uploader(key="csv_upload").set_value(("changed.csv", b"x,genre\n1,a\n2,a\n3,b\n4,b", "text/csv")).run()

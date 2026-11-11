@@ -129,7 +129,7 @@ class AppTests(unittest.TestCase):
     def select(self, app, label):
         return next(element for element in app.selectbox if element.label == label)
 
-    def test_default_and_pending_training(self):
+    def test_default_and_training(self):
         app = self.make_app()
         self.assertEqual(list(app.exception), [])
         self.assertEqual(self.select(app, "Target column").value, "genre")
@@ -138,8 +138,7 @@ class AppTests(unittest.TestCase):
         self.assertFalse(next(b for b in app.button if b.label == "Run analysis").disabled)
         next(b for b in app.button if b.label == "Run analysis").click().run()
         self.assertEqual(list(app.exception), [])
-        self.assertTrue(any("not connected yet" in message.value for message in app.info))
-        self.assertNotIn("result", app.session_state)
+        self.assertIn("result", app.session_state)
 
     def test_music_data_sources_and_classifiers(self):
         app = self.make_app()

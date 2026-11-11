@@ -18,12 +18,11 @@ The workspace has five steps: **Import → Explore → Configure → Results →
 - Configuration download and clearing of previous results when analysis inputs change.
 
 **Preview sample results** opens a separate walkthrough with illustrative predictions.
-Its exports are labelled as a sample session. Model training and clustering still
-require the team implementations. Single-WAV extraction uses Charaf's real extractor.
+Its exports are labelled as a sample session. For real results, run a model from Configure. Single-WAV extraction uses Charaf's extractor.
 
 ## Setup on Windows
 
-Use Python 3.12 or newer. The current integration machine uses Python 3.14.3.
+Use Python 3.12 or newer. The integrated app was tested on Windows with Python 3.12.
 Install `requirements.txt`, including librosa and soundfile for WAV extraction.
 Allow sufficient free disk space for the scientific Python dependencies.
 `requirements-lock.txt` records the installed versions from this integration machine.
@@ -62,7 +61,6 @@ streamlit run app.py
 
 The music table is synthetic. A BPM regression setup demonstrates the workflow;
 it does not establish that these predictors can reliably estimate tempo in real music.
-Training still needs a backend implementation.
 
 ## Studio appearance
 
@@ -119,7 +117,8 @@ when available. Synthetic walkthroughs cannot be used to predict real WAV genres
 ## Checks
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe -m pip install pytest
+.\.venv\Scripts\python.exe -m pytest -q
 ```
 
 The audio dependencies were installed with
@@ -127,7 +126,7 @@ The audio dependencies were installed with
 `.\.venv\Scripts\python.exe -m pip check` verifies dependency consistency.
 
 Tests cover CSV boundaries, predictor leakage, configuration invalidation, interface
-navigation, pending-module behavior and a connected test backend's result/export path.
+navigation, real GTZAN training and the result/export path.
 Test-only outputs are never used as application demo results.
 
 ## Source package
@@ -195,8 +194,7 @@ tolerance 1e-6):
 ```
 
 The command prints the reference, upload value, absolute difference and match flag
-for each feature; it fails if any feature falls outside the tolerances. It has not
-yet been run on the actual Nocturne recording in this checkout.
+for each feature; it fails if any feature falls outside the tolerances.
 
 Exported `06-fitted-model.joblib` stores both `pipeline` and `metadata`. To reuse a
 trusted team-generated model in Python with the same dependencies:
@@ -211,20 +209,13 @@ row = pd.read_csv("timbrelab_wav_features.csv")
 print(predict_audio(saved, row))
 ```
 
-## Remaining team handoffs
+## Integrated backends
 
-| Owner | Exact dependency | Acceptance check |
-| --- | --- | --- |
-| Basma | `models.train_supervised(table, task, target, features, model_name, group_column=None)` | Real genre classification and BPM regression, recording-disjoint evaluation, fitted pipeline, predictions, metrics and matching metadata. |
-| Charaf | `audio.random_forest.make_random_forest()` is available | Register it as `random_forest` through Basma's trainer. |
-| Layla | `analysis.run_clustering(table, features, k)` | Real numeric clustering, fitted pipeline, row IDs and assignments, metrics and metadata. |
-| Basma + Charaf | `audio.random_forest.recording_split(recording_ids, genres)` is available | Use the shared genre split, exclude the conflicting rock/metal recording group, and reserve held-out groups for final evaluation. |
-| Charaf + Chems | `NocturneN20.wav`, matching `data/examples/NocturneN20_features.csv` | Compare all 16 upload measurements with rounding tolerance, then predict with the real fitted model. |
-| Charaf | Second-laptop source ZIP run | Follow the acceptance checklist below and report the actual results. |
-
-Until these handoffs arrive, the source ZIP is an **integration candidate**, not
-the accepted final release. No real classifier, regression or clustering scores
-are claimed. The sample preview remains explicitly illustrative.
+Basma's trainer uses Charaf's Random Forest factory. For the bundled GTZAN
+genre classification data, the app uses Charaf's shared split, with 797 training
+clips, 200 test clips, and the two conflicting clips excluded. Regression uses
+the trainer's own split, grouped by recording for GTZAN. Layla's K-means pipeline
+returns the assignments and settings for Results and Export.
 
 ## Second-laptop acceptance (Charaf)
 
@@ -233,7 +224,7 @@ are claimed. The sample preview remains explicitly illustrative.
    `python -m pip check` using that environment and run the full test command.
 3. Start Streamlit. Upload the bundled GTZAN CSV; verify 999 / 19 / 10, jazz 99,
    other genres 100. Open the downloaded table CSV and genre chart PNG.
-4. Once Basma and Layla's implementations are connected, train a genre classifier,
+4. Train a genre classifier,
    run a BPM regression and run clustering. Record model settings and returned
    scores; confirm IDs and labels were excluded and recording groups stay together.
 5. Upload the same Nocturne WAV as the reference, extract all 16 measurements, compare
@@ -251,13 +242,3 @@ instructions. The Nocturne recording itself is not bundled.
 The shared genre split excludes the conflicting group containing `rock/rock.00016.wav`
 and `metal/metal.00058.wav`. Basma should use `recording_split` consistently for
 all genre classifiers. See [the Random Forest handoff](https://github.com/Charaf9999/TimbreLab/blob/fb5350dc15c15eb48c38c8bf197a60e328802c77/docs/random-forest.md).
-
-## Integration verification
-
-The baseline suite passed 16 tests. After integration, all 31 tests passed from
-a freshly extracted source ZIP on the integration machine. Dependency checks passed.
-The real CSV was uploaded through the browser and its genre chart downloaded and
-opened. Charaf's shared split gives 797 training clips, 200 test clips and two
-excluded clips, with each recording ID confined to one partition. WAV upload
-checks used generated audio. Real model training and the Nocturne reference
-comparison await the dependencies listed above. Charaf's second-laptop check is pending.

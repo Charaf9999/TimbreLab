@@ -42,9 +42,9 @@ def build_source_zip(destination=DESTINATION):
     manifest = {
         "project": "TimbreLab",
         "target_repository": "https://github.com/Charaf9999/TimbreLab",
-        "suggested_branch": "ui/music-studio",
+        "suggested_branch": "integration/team-check",
         "publication": "Local source package; this script does not create branches or push to GitHub.",
-        "status": "Dataset and audio integration candidate; supervised training, clustering and second-laptop acceptance are pending.",
+        "status": "Integrated source package. Verify on a second laptop before submission.",
         "files": [{"path": name, "bytes": len(content), "sha256": sha256(content).hexdigest()}
                   for name, content in sorted(payloads.items())],
     }
